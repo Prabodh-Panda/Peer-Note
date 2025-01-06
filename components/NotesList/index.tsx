@@ -1,6 +1,7 @@
 "use client";
 import { supabase } from "@/lib/supabase";
 import { Note } from "@/lib/supabase/helpers";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -42,12 +43,12 @@ export default function NotesList() {
                 <p className="mb-4">
                   <strong>Grade:</strong> {note.grade}
                 </p>
-                <a
-                  href={`/notes/${note.id}`}
+                <Link
+                  href={`/browse/${note.id}`}
                   className="inline-block px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-transform transform hover:scale-105"
                 >
                   View Details
-                </a>
+                </Link>
               </div>
             ))}
           </div>

@@ -10,17 +10,16 @@ const Navbar = () => {
   const login = useAuthState((state) => state.login);
   const logout = useAuthState((state) => state.logout);
 
-  const getUser = async () => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        login(session.user);
-      } else {
-        logout();
-      }
-    });
-  };
-
   useEffect(() => {
+    const getUser = async () => {
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          login(session.user);
+        } else {
+          logout();
+        }
+      });
+    };
     getUser();
   }, []);
 
