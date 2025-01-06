@@ -1,6 +1,7 @@
 import HeroSection from "../components/HeroSection";
 import FeatureHighlights from "../components/FeatureHighlights";
 import NotesList from "../components/NotesList";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const demoNotes = [
@@ -26,22 +27,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-bg-accent via-white to-bg-accent">
-      <header className="bg-accent text-white p-6 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold tracking-tight">PeerNotes</h1>
-          <nav className="space-x-6">
-            <a href="/" className="hover:underline text-lg">
-              Home
-            </a>
-            <a href="/browse" className="hover:underline text-lg">
-              Browse Notes
-            </a>
-            <a href="/login" className="hover:underline text-lg">
-              Login
-            </a>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow">
         <HeroSection />

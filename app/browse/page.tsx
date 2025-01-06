@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import UploadNoteDialog from "@/components/Note/UploadNoteDialog";
+import Navbar from "@/components/Navbar";
 
 export default function BrowseNotes() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,22 +44,7 @@ export default function BrowseNotes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-accent via-white to-accent">
-      <header className="bg-accent text-white p-6 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold tracking-tight">PeerNotes</h1>
-          <nav className="space-x-6">
-            <a href="/" className="hover:underline text-lg">
-              Home
-            </a>
-            <a href="/browse" className="hover:underline text-lg">
-              Browse Notes
-            </a>
-            <a href="/login" className="hover:underline text-lg">
-              Login
-            </a>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="container mx-auto py-16 px-10">
         <h2 className="text-4xl font-extrabold mb-8 text-center text-white">
