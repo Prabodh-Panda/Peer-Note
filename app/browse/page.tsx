@@ -1,46 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UploadNoteDialog from "@/components/Note/UploadNoteDialog";
 import Navbar from "@/components/Navbar";
+import { useAuthState } from "@/zustand/auth";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
+import { Note } from "@/lib/supabase/helpers";
 
 export default function BrowseNotes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const fetchNotes = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("notes").select();
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNotes(data);
+  };
 
-  const demoNotes = [
-    {
-      id: 1,
-      title: "Introduction to Biology",
-      subject: "Biology",
-      grade: "Grade 10",
-    },
-    {
-      id: 2,
-      title: "Basics of Algebra",
-      subject: "Mathematics",
-      grade: "Grade 9",
-    },
-    {
-      id: 3,
-      title: "World History Overview",
-      subject: "History",
-      grade: "Grade 11",
-    },
-    {
-      id: 4,
-      title: "Physics Fundamentals",
-      subject: "Physics",
-      grade: "Grade 12",
-    },
-  ];
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
-  const filteredNotes = demoNotes.filter(
+  const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.grade.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const user = useAuthState((state) => state.user);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-accent via-white to-accent">
@@ -58,15 +53,25 @@ export default function BrowseNotes() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button
-            onClick={() => setIsDialogOpen(true)}
-            className="ml-4 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-all"
-          >
-            Upload Note
-          </button>
+          {user ? (
+            <button
+              onClick={() => setIsDialogOpen(true)}
+              className="ml-4 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-all"
+            >
+              Upload Note
+            </button>
+          ) : (
+            <button
+              className="ml-4 px-6 py-3 bg-gray-200 rounded-lg cursor-not-allowed"
+              disabled
+            >
+              Login to Upload Note
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredNotes.length > 0 ? (
+          {loading ? <p>Loading Notes...</p> : null}
+          {!loading && filteredNotes.length > 0 ? (
             filteredNotes.map((note) => (
               <div
                 key={note.id}
@@ -76,11 +81,15 @@ export default function BrowseNotes() {
                 <p className="mb-2">
                   <strong>Subject:</strong> {note.subject}
                 </p>
+                <p className="mb-2">
+                  <strong>Visibility: </strong>
+                  {note.is_public ? "Public" : "Private"}
+                </p>
                 <p className="mb-4">
                   <strong>Grade:</strong> {note.grade}
                 </p>
                 <a
-                  href={`/notes/${note.id}`}
+                  href={`/browse/${note.id}`}
                   className="inline-block px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-transform transform hover:scale-105"
                 >
                   View Details

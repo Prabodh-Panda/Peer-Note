@@ -2,11 +2,28 @@
 import { supabase } from "@/lib/supabase";
 import { useAuthState } from "@/zustand/auth";
 import Link from "next/link";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
   const user = useAuthState((state) => state.user);
+  const login = useAuthState((state) => state.login);
   const logout = useAuthState((state) => state.logout);
+
+  const getUser = async () => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        login(session.user);
+      } else {
+        logout();
+      }
+    });
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {

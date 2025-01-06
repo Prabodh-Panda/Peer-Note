@@ -9,6 +9,12 @@ import TagInput from "../Inputs/TagInput";
 import toast from "react-hot-toast";
 import axios, { AxiosResponse } from "axios";
 import { GRADES } from "@/lib/grades";
+import { useAuthState } from "@/zustand/auth";
+import { supabase } from "@/lib/supabase";
+import { v4 as uuidv4 } from "uuid";
+import { Database } from "@/lib/supabase/database.types";
+
+type NoteRow = Database["public"]["Tables"]["notes"]["Insert"];
 
 interface Props {
   isOpen: boolean;
@@ -27,6 +33,7 @@ interface FileDetails {
 }
 
 export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
+  const user = useAuthState((state) => state.user);
   const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");
@@ -34,6 +41,68 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
   const [subject, setSubject] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user) return;
+
+    const file_id = uuidv4();
+
+    if (!file) return;
+
+    if (!tags || tags.length < 1) {
+      toast.error("Enter atleast one tag");
+      return;
+    }
+
+    setLoading(true);
+    const toastId = toast.loading("Creating Note");
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("notes")
+        .upload(`${file_id}.pdf`, file);
+
+      if (error) {
+        throw error.message;
+      }
+
+      const public_url = supabase.storage.from("notes").getPublicUrl(data.path);
+
+      const payload = {
+        title,
+        subject,
+        grade,
+        tags,
+        summary,
+        is_public: isPublic,
+        email: user.email,
+        file_url: public_url.data.publicUrl,
+      } as NoteRow;
+      const { error: tableError } = await supabase
+        .from("notes")
+        .insert(payload);
+
+      if (tableError) {
+        throw tableError.message;
+      }
+
+      toast.success("Note added", { id: toastId });
+      setTitle("");
+      setSubject("");
+      setGrade("");
+      setSubject("");
+      setTags([]);
+      setSummary("");
+      setIsPublic(false);
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error, { id: toastId });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -94,7 +163,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
           <DialogTitle className="text-2xl font-bold mb-4">
             Upload Note
           </DialogTitle>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 items-center gap-4">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -105,6 +174,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
                   accept="application/pdf"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300"
                   onChange={handleFileChange}
+                  required
                 />
               </div>
               <div>
@@ -126,6 +196,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -138,6 +209,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
+                  required
                 />
               </div>
               <div className="mb-4">
@@ -148,7 +220,11 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300"
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
+                  required
                 >
+                  <option value="" disabled>
+                    Select a grade
+                  </option>
                   {GRADES.map((grade) => (
                     <option key={grade.label} value={grade.value}>
                       {grade.label}
@@ -173,7 +249,21 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
                 onChange={(e) => setSummary(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300"
                 rows={5}
+                required
               />
+            </div>
+            <div>
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                  className="form-checkbox h-5 w-5 text-accent rounded"
+                />
+                <span className="ml-2 text-gray-700">
+                  Make this note public
+                </span>
+              </label>
             </div>
             <div className="flex justify-end">
               <DialogClose className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg mr-2">
@@ -181,7 +271,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
               </DialogClose>
               <button
                 type="submit"
-                className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent-darker"
+                className="px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent-darker disabled:bg-gray-200 disabled:cursor-not-allowed disabled:text-black"
                 disabled={loading}
               >
                 Submit
