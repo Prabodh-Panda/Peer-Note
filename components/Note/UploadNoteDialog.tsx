@@ -149,6 +149,7 @@ export default function UploadNoteDialog({ isOpen, onOpenChange }: Props) {
       setTags(data.tags);
       setSummary(data.summary);
     } catch (error) {
+      console.log(error);
       toast.error("Error while parsing file");
     } finally {
       toast.dismiss(toastId);

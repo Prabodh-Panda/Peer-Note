@@ -46,7 +46,7 @@ export default function NoteDetails({
           Note Not Found
         </h2>
         <p className="text-lg text-gray-600">
-          The note you're looking for doesn't exist.
+          The note you are looking for does not exist.
         </p>
       </div>
     );

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HeroSection() {
   return (
     <div className="bg-gradient-to-r from-accent to-accent-darker text-white py-24">
@@ -7,12 +9,12 @@ export default function HeroSection() {
           Enhance your learning experience with seamless note sharing. Join us
           today!
         </p>
-        <a
+        <Link
           href="/browse"
           className="px-8 py-4 bg-white text-accent font-bold rounded-full shadow-lg hover:bg-gray-200 transition-transform transform hover:scale-105"
         >
           Browse Notes
-        </a>
+        </Link>
       </div>
     </div>
   );
