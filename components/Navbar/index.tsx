@@ -22,7 +22,7 @@ const Navbar = () => {
 
   useEffect(() => {
     getUser();
-  }, [getUser]);
+  }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
