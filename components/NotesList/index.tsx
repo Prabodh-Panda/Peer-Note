@@ -10,7 +10,11 @@ export default function NotesList() {
   const [notes, setNotes] = useState<Note[]>([]);
   const fetchNotes = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("notes").select().limit(3);
+    const { data, error } = await supabase
+      .from("notes")
+      .select()
+      .order("created_at", { ascending: false })
+      .limit(3);
     setLoading(false);
     if (error) {
       toast.error(error.message);
@@ -28,7 +32,7 @@ export default function NotesList() {
           Latest Notes
         </h2>
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-white font-bold text-center">Loading...</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {notes.map((note) => (
@@ -42,6 +46,13 @@ export default function NotesList() {
                 </p>
                 <p className="mb-4">
                   <strong>Grade:</strong> {note.grade}
+                </p>
+                <p className="mb-4">
+                  <strong>Visibility:</strong>{" "}
+                  {note.is_public ? "Public" : "Private"}
+                </p>
+                <p className="mb-4">
+                  <strong>Tags:</strong> {note.tags.join(", ")}
                 </p>
                 <Link
                   href={`/browse/${note.id}`}

@@ -32,7 +32,8 @@ export default function BrowseNotes() {
     (note) =>
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.grade.toLowerCase().includes(searchTerm.toLowerCase())
+      note.grade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.tags.join(",").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const user = useAuthState((state) => state.user);
@@ -48,7 +49,7 @@ export default function BrowseNotes() {
         <div className="mb-8 flex justify-between">
           <input
             type="text"
-            placeholder="Search notes by title, subject, or grade..."
+            placeholder="Search notes by title, subject, tags or grade..."
             className="w-full px-4 py-3 rounded-lg shadow-md border border-gray-300"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -87,6 +88,9 @@ export default function BrowseNotes() {
                 </p>
                 <p className="mb-4">
                   <strong>Grade:</strong> {note.grade}
+                </p>
+                <p className="mb-4">
+                  <strong>Tags:</strong> {note.tags.join(", ")}
                 </p>
                 <a
                   href={`/browse/${note.id}`}
