@@ -38,7 +38,7 @@ export default function NotesList() {
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
+                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition-shadow flex flex-col"
               >
                 <h3 className="text-2xl font-bold mb-4">{note.title}</h3>
                 <p className="mb-2">
@@ -56,7 +56,7 @@ export default function NotesList() {
                 </p>
                 <Link
                   href={`/browse/${note.id}`}
-                  className="inline-block px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-transform transform hover:scale-105"
+                  className="inline-block px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent-darker transition-transform transform hover:scale-105 mt-auto w-fit"
                 >
                   View Details
                 </Link>
